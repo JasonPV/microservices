@@ -1,0 +1,56 @@
+version: '3.7'
+
+services:
+    statelesservice:
+        build:
+            context: ./statelesservice
+        image: statelesservice
+        restart: unless-stopped
+        expose:
+            - "5000"
+
+        # ports:
+        #     - "127.0.0.1:5000:5000"
+        depends_on: 
+            - db
+
+    statefulservice:
+        build:
+            context: ./statefulservice
+        image: statefulservice
+        container_name: statefulservice
+        restart: unless-stopped
+
+        expose:
+            - "5001"
+        depends_on: 
+            - db
+        # ports:
+        #     - "127.0.0.1:5001:5001"
+    nginx:
+        image: nginx
+        container_name: nginx
+        restart: unless-stopped
+        volumes:
+            - ./gateway/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+        depends_on:
+            - statelesservice
+            - db
+            - statefulservice
+        ports:
+            - "127.0.0.1:4000:80"
+
+    db:
+        image: mysql:5.7
+        volumes:
+            - ./mysql/mycustom.cnf:/etc/mysql/conf.d/custom.cnf    
+        container_name: db
+        hostname: db
+        ports:
+            - "3306:3306"
+            
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_USER: jason
+            MYSQL_PASSWORD: '12345678'
+            MYSQL_DATABASE: microservices
