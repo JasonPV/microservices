@@ -2,6 +2,7 @@ from flask import Flask
 from flask import Flask, request
 from flask_restful import Api, Resource
 from flask_sqlalchemy import SQLAlchemy
+import pickle
 
 
 app = Flask(__name__)
@@ -10,9 +11,11 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://jason:12345678@db/micro
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-
-data = {}
-
+try:
+    with open('data.pickle', 'rb') as f:
+        data = pickle.load(f)
+except:
+    data = {}
 
 class Data(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -30,13 +33,17 @@ class GetTexts(Resource):
                 data[theme] += 1
             else:
                 data[theme] = 1
-        
+            with open('data.pickle', 'wb') as f:
+                pickle.dump(data, f)
             return text
+            
         else:
             if theme in data.keys():
                 data[theme] += 1
             else:
                 data[theme] = 1
+            with open('data.pickle', 'wb') as f:
+                pickle.dump(data, f)
             return "this theme not used"
 
 
