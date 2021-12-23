@@ -23,7 +23,7 @@ db.create_all()
 class GenText(Resource):
     def get(self):
         theme = request.args.get('theme')
-        genereted ='hello, nigga'# generate(theme)
+        genereted = generate(theme)
 
         write_to_db = Data(theme=theme, genereted=genereted)
         db.session.add(write_to_db)        
